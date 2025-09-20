@@ -12,8 +12,8 @@ TELEGRAM_BOT_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"
 TELEGRAM_CHAT_ID = "YOUR_TELEGRAM_CHAT_ID"
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
-SMTP_USER = "yourgmail@gmail.com"
-SMTP_PASS = "your_app_password"
+SMTP_USER = "ombaiakas62@gmail.com"
+SMTP_PASS = "Fr4m4n401@525262"
 
 
 # === Helper Functions ===
