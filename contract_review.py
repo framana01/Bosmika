@@ -9,7 +9,7 @@ from datetime import datetime
 SHEET_FILE = "contracts.csv"  # Simulasi Google Sheets pakai CSV
 STREAMLINE_URL = "https://api.streamline.placeholder/review"
 TELEGRAM_BOT_TOKEN = "8424327971:AAGsuuQEsDbSVHmbZXGprxnU-lROmKlNmFU"
-TELEGRAM_CHAT_ID = "54110070"
+TELEGRAM_CHAT_ID = "252191346"
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
 SMTP_USER = "poke.hunting62@gmail.com"
