@@ -2,6 +2,7 @@ import pandas as pd
 import os
 import smtplib
 import requests
+import re
 from email.mime.text import MIMEText
 from datetime import datetime
 from PyPDF2 import PdfReader
@@ -10,28 +11,25 @@ from PyPDF2 import PdfReader
 SHEET_FILE = "contracts.csv"  # Simulasi Google Sheets pakai CSV
 STREAMLINE_URL = "https://api.streamline.placeholder/review"
 TELEGRAM_BOT_TOKEN = "8424327971:AAGsuuQEsDbSVHmbZXGprxnU-lROmKlNmFU"
-TELEGRAM_CHAT_ID = "252191346"
+TELEGRAM_CHAT_ID = "252191346"  # pastikan hasil getUpdates
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
 SMTP_USER = "poke.hunting62@gmail.com"
-SMTP_PASS = "kydbjztpxetqcgoh"
+SMTP_PASS = "kydbjztpxetqcgoh"  # App Password Gmail
 
 
 # === Helper Functions ===
 def load_sheet():
-    """Load sheet as dataframe"""
     if os.path.exists(SHEET_FILE):
         return pd.read_csv(SHEET_FILE)
     return pd.DataFrame(columns=["ContractID", "FileName", "ExpiryDate", "UploadedAt"])
 
 
 def save_sheet(df):
-    """Save dataframe back to CSV (simulate Google Sheets)"""
     df.to_csv(SHEET_FILE, index=False)
 
 
 def streamline_review(file_name):
-    """Simulate sending file to Streamline API"""
     try:
         response = requests.post(STREAMLINE_URL, json={"file": file_name})
         return response.json()
@@ -40,7 +38,6 @@ def streamline_review(file_name):
 
 
 def send_telegram_message(message):
-    """Send Telegram notification"""
     url = f"https://api.telegram.org/bot8424327971:AAGsuuQEsDbSVHmbZXGprxnU-lROmKlNmFU/sendMessage"
     payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message}
     try:
@@ -50,12 +47,10 @@ def send_telegram_message(message):
 
 
 def send_email(subject, body, to_email="framana01@gmail.com"):
-    """Send email via Gmail SMTP"""
     msg = MIMEText(body, "plain")
     msg["Subject"] = subject
     msg["From"] = SMTP_USER
     msg["To"] = to_email
-
     try:
         with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
             server.starttls()
@@ -65,26 +60,44 @@ def send_email(subject, body, to_email="framana01@gmail.com"):
         print("Email error:", e)
 
 
-def add_contract(contract_id, file_name, expiry_date):
-    """Add new contract (skip if duplicate)"""
-    df = load_sheet()
+def extract_expiry_from_pdf(file_path):
+    """Extract expiry date (YYYY-MM-DD) from PDF text"""
+    try:
+        reader = PdfReader(file_path)
+        text = ""
+        for page in reader.pages:
+            text += page.extract_text() or ""
 
-    # Cek duplikasi
+        match = re.search(r"\d{4}-\d{2}-\d{2}", text)
+        if match:
+            return match.group(0)
+    except Exception as e:
+        print("PDF parse error:", e)
+    return None
+
+
+def add_contract(contract_id, file_path):
+    df = load_sheet()
+    file_name = os.path.basename(file_path)
+
     if contract_id in df["ContractID"].values:
         print("⚠️ Duplikasi kontrak, tidak disimpan:", contract_id)
         return False
 
-    # Tambah kontrak baru
+    expiry_date = extract_expiry_from_pdf(file_path)
+    if not expiry_date:
+        print(f"⚠️ Tidak ditemukan tanggal expired di {file_name}, isi manual!")
+        return False
+
     now = datetime.now().isoformat()
     new_row = {"ContractID": contract_id, "FileName": file_name, "ExpiryDate": expiry_date, "UploadedAt": now}
     df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
     save_sheet(df)
-    print("✅ Kontrak berhasil disimpan:", file_name)
+    print("✅ Kontrak berhasil disimpan:", file_name, "| Expiry:", expiry_date)
     return True
 
 
 def check_expired_contracts():
-    """Check contracts that will expire <= 90 days"""
     df = load_sheet()
     if df.empty:
         print("Tidak ada kontrak di database.")
@@ -105,10 +118,10 @@ def check_expired_contracts():
 
 # === Demo Run ===
 if __name__ == "__main__":
-    # Simulasi tambah kontrak
-    add_contract("001", "kontrak_vendorA.pdf", "2025-12-15")
-    add_contract("002", "kontrak_vendorB.pdf", "2025-10-05")
-    add_contract("003", "kontrak_vendorC.pdf", "2026-01-01")
+    # Simulasi tambah kontrak (PDF harus ada di folder yang sama)
+    add_contract("001", "kontrak_vendorA.pdf")
+    add_contract("002", "kontrak_vendorB.pdf")
+    add_contract("003", "kontrak_vendorC.pdf")
 
     # Cek kontrak yang mendekati expired
     check_expired_contracts()
