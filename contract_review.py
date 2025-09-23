@@ -9,11 +9,11 @@ from datetime import datetime
 SHEET_FILE = "contracts.csv"  # Simulasi Google Sheets pakai CSV
 STREAMLINE_URL = "https://api.streamline.placeholder/review"
 TELEGRAM_BOT_TOKEN = "8424327971:AAGsuuQEsDbSVHmbZXGprxnU-lROmKlNmFU"
-TELEGRAM_CHAT_ID = "YOUR_TELEGRAM_CHAT_ID"
+TELEGRAM_CHAT_ID = "54110070"
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
 SMTP_USER = "poke.hunting62@gmail.com"
-SMTP_PASS = "kydb jztp xetq cgoh"
+SMTP_PASS = "kydbjztpxetqcgoh"
 
 
 # === Helper Functions ===
@@ -40,7 +40,7 @@ def streamline_review(file_name):
 
 def send_telegram_message(message):
     """Send Telegram notification"""
-    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    url = f"https://api.telegram.org/bot8424327971:AAGsuuQEsDbSVHmbZXGprxnU-lROmKlNmFU/sendMessage"
     payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message}
     try:
         requests.post(url, json=payload)
@@ -48,7 +48,7 @@ def send_telegram_message(message):
         print("Telegram error:", e)
 
 
-def send_email(subject, body, to_email="recipient@example.com"):
+def send_email(subject, body, to_email="framana01@gmail.com"):
     """Send email via Gmail SMTP"""
     msg = MIMEText(body, "plain")
     msg["Subject"] = subject
