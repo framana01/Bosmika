@@ -4,6 +4,7 @@ import smtplib
 import requests
 from email.mime.text import MIMEText
 from datetime import datetime
+from PyPDF2 import PdfReader
 
 # === Konfigurasi ===
 SHEET_FILE = "contracts.csv"  # Simulasi Google Sheets pakai CSV
