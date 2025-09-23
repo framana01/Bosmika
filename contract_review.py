@@ -8,12 +8,12 @@ from datetime import datetime
 # === Konfigurasi ===
 SHEET_FILE = "contracts.csv"  # Simulasi Google Sheets pakai CSV
 STREAMLINE_URL = "https://api.streamline.placeholder/review"
-TELEGRAM_BOT_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"
+TELEGRAM_BOT_TOKEN = "8424327971:AAGsuuQEsDbSVHmbZXGprxnU-lROmKlNmFU"
 TELEGRAM_CHAT_ID = "YOUR_TELEGRAM_CHAT_ID"
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
 SMTP_USER = "poke.hunting62@gmail.com"
-SMTP_PASS = "fr4m4n401"
+SMTP_PASS = "kydb jztp xetq cgoh"
 
 
 # === Helper Functions ===
