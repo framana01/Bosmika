@@ -9,7 +9,8 @@ from PyPDF2 import PdfReader
 
 # === Konfigurasi ===
 SHEET_FILE = "contracts.csv"  # Simulasi Google Sheets pakai CSV
-STREAMLINE_URL = "STREAMLINE_URL = "https://api.streamline.ai/v1/contracts/review"
+STREAMLINE_URL = "https://api.streamline.ai/v1/contracts/review"  # Ganti dengan API asli
+
 TELEGRAM_BOT_TOKEN = "8424327971:AAGsuuQEsDbSVHmbZXGprxnU-lROmKlNmFU"
 TELEGRAM_CHAT_ID = "252191346"  # pastikan hasil getUpdates
 SMTP_SERVER = "smtp.gmail.com"
