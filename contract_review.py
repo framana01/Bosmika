@@ -13,13 +13,13 @@ SHEET_FILE = "contracts.csv"
 STREAMLINE_URL = "https://api.streamline.ai/v1/contracts/review"
 
 # Secrets disimpan di Streamlit Cloud
-TELEGRAM_BOT_TOKEN = st.secrets.get("TELEGRAM_BOT_TOKEN", "")
-TELEGRAM_CHAT_ID = st.secrets.get("TELEGRAM_CHAT_ID", "")
+TELEGRAM_BOT_TOKEN = st.secrets.get("TELEGRAM_BOT_TOKEN", "8424327971:AAGsuuQEsDbSVHmbZXGprxnU-lROmKlNmFU")
+TELEGRAM_CHAT_ID = st.secrets.get("TELEGRAM_CHAT_ID", "252191346")
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
-SMTP_USER = st.secrets.get("SMTP_USER", "")
-SMTP_PASS = st.secrets.get("SMTP_PASS", "")
-EMAIL_TO = st.secrets.get("EMAIL_TO", "")
+SMTP_USER = st.secrets.get("SMTP_USER", "poke.hunting62@gmail.com")
+SMTP_PASS = st.secrets.get("SMTP_PASS", "kydbjztpxetqcgoh")# App Password Gmail
+EMAIL_TO = st.secrets.get("EMAIL_TO", "ombaiakas62@gmail.com")
 
 os.makedirs("uploads", exist_ok=True)
 
@@ -58,7 +58,7 @@ def streamline_review(file_path):
 def send_telegram_message(message: str):
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
         return
-    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    url = f"https://api.telegram.org/bot8424327971:AAGsuuQEsDbSVHmbZXGprxnU-lROmKlNmFU/sendMessage"
     payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message}
     try:
         requests.post(url, json=payload)
