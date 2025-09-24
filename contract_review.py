@@ -30,16 +30,27 @@ def save_sheet(df):
     df.to_csv(SHEET_FILE, index=False)
 
 
-def streamline_review(file_name):
+def streamline_review(file_path):
+    """Upload file PDF ke API Streamline"""
     try:
-        response = requests.post(STREAMLINE_URL, json={"file": file_name})
-        return response.json()
+        with open(file_path, "rb") as f:
+            files = {"file": f}
+            response = requests.post(STREAMLINE_URL, files=files)
+
+        print("Status:", response.status_code)
+        print("Respon:", response.text[:300])
+
+        # Jika API tidak mengembalikan JSON valid, kirim error
+        try:
+            return response.json()
+        except Exception:
+            return {"status": "error", "message": response.text}
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
 
 def send_telegram_message(message):
-    url = f"https://api.telegram.org/bot8424327971:AAGsuuQEsDbSVHmbZXGprxnU-lROmKlNmFU/sendMessage"
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message}
     try:
         requests.post(url, json=payload)
@@ -62,7 +73,7 @@ def send_email(subject, body, to_email="framana01@gmail.com"):
 
 
 def extract_expiry_from_pdf(file_path):
-    """Extract expiry date (YYYY-MM-DD) from PDF text"""
+    """Extract expiry date (YYYY-MM-DD) dari isi PDF"""
     try:
         reader = PdfReader(file_path)
         text = ""
@@ -75,6 +86,27 @@ def extract_expiry_from_pdf(file_path):
     except Exception as e:
         print("PDF parse error:", e)
     return None
+
+
+def format_review_message(file_name, review_result):
+    """Bikin pesan rapi untuk Telegram & Email"""
+    if not isinstance(review_result, dict):
+        return f"📄 Review Kontrak: {file_name}\n\nHasil: {review_result}"
+
+    status = review_result.get("status", "Tidak diketahui")
+    summary = review_result.get("review", review_result.get("message", "Tidak ada ringkasan"))
+
+    if status == "error":
+        return (
+            f"📄 Review Kontrak: {file_name}\n"
+            f"❌ ERROR: {summary}"
+        )
+    else:
+        return (
+            f"📄 Review Kontrak: {file_name}\n"
+            f"✅ Status: {status}\n"
+            f"📝 Ringkasan: {summary}"
+        )
 
 
 def add_contract(contract_id, file_path):
@@ -95,6 +127,18 @@ def add_contract(contract_id, file_path):
     df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
     save_sheet(df)
     print("✅ Kontrak berhasil disimpan:", file_name, "| Expiry:", expiry_date)
+
+    # Jalankan review ke API Streamline
+    review_result = streamline_review(file_path)
+    print("Hasil Review:", review_result)
+
+    # Format pesan review
+    review_msg = format_review_message(file_name, review_result)
+
+    # Kirim hasil review ke Telegram & Email
+    send_telegram_message(review_msg)
+    send_email(f"📄 Hasil Review Kontrak - {file_name}", review_msg)
+
     return True
 
 
