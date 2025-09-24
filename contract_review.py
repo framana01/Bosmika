@@ -8,10 +8,6 @@ import requests
 import smtplib
 from email.mime.text import MIMEText
 
-# === Konfigurasi ===
-SHEET_FILE = "contracts.csv"
-STREAMLINE_URL = "https://api.streamline.ai/v1/contracts/review"
-
 # Secrets disimpan di Streamlit Cloud
 TELEGRAM_BOT_TOKEN = st.secrets.get("TELEGRAM_BOT_TOKEN", "8424327971:AAGsuuQEsDbSVHmbZXGprxnU-lROmKlNmFU")
 TELEGRAM_CHAT_ID = st.secrets.get("TELEGRAM_CHAT_ID", "252191346")
@@ -34,6 +30,7 @@ def save_sheet(df):
     df.to_csv(SHEET_FILE, index=False)
 
 def extract_expiry_from_pdf(file_path):
+    """Cari tanggal expiry (format YYYY-MM-DD) dalam PDF"""
     try:
         reader = PdfReader(file_path)
         text = ""
@@ -47,18 +44,32 @@ def extract_expiry_from_pdf(file_path):
     return None
 
 def streamline_review(file_path):
+    """Kirim kontrak ke API Streamline untuk direview"""
     try:
         with open(file_path,"rb") as f:
-            files={"file":f}
-            response=requests.post(STREAMLINE_URL,files=files)
-        return response.json()
+            files = {"file": f}
+            headers = {
+                "Authorization": f"Bearer {STREAMLINE_API_KEY}",
+                "Accept": "application/json"
+            }
+            response = requests.post(STREAMLINE_URL, files=files, headers=headers)
+
+        # Debug response
+        print("Status Code:", response.status_code)
+        print("Raw Response:", response.text[:300])
+
+        try:
+            return response.json()
+        except Exception:
+            return {"status": "error", "message": response.text}
     except Exception as e:
-        return {"status":"error","message":str(e)}
+        return {"status": "error", "message": str(e)}
 
 def send_telegram_message(message: str):
+    """Kirim notifikasi ke Telegram"""
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
         return
-    url = f"https://api.telegram.org/bot8424327971:AAGsuuQEsDbSVHmbZXGprxnU-lROmKlNmFU/sendMessage"
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message}
     try:
         requests.post(url, json=payload)
@@ -66,6 +77,7 @@ def send_telegram_message(message: str):
         st.error(f"Telegram error: {e}")
 
 def send_email(subject, body, to_email=EMAIL_TO):
+    """Kirim email notifikasi"""
     if not SMTP_USER or not SMTP_PASS or not EMAIL_TO:
         return
     msg = MIMEText(body, "plain")
@@ -81,6 +93,7 @@ def send_email(subject, body, to_email=EMAIL_TO):
         st.error(f"Email error: {e}")
 
 def format_review_message(file_name, review_result):
+    """Format hasil review jadi pesan rapi"""
     if not isinstance(review_result, dict):
         return f"📄 Review Kontrak: {file_name}\n\nHasil: {review_result}"
 
